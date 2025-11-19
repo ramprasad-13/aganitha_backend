@@ -1,5 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import helmet from 'helmet';
 // Load environment variables immediately
 dotenv.config();
 
@@ -11,7 +12,48 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 import cors from 'cors';
-app.use(cors())
+
+// Define allowed origins
+const allowedOrigins = [
+  'https://aganitha-frontend.vercel.app',
+  'http://localhost:5173', // For local development
+];
+
+// CORS configuration with dynamic origin handling
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g., server-to-server or Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      callback(null, origin); // Reflect the request origin
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
+}));
+
+// Apply Helmet middleware for security headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", ...allowedOrigins],
+      styleSrc: ["'self'", "'unsafe-inline'", ...allowedOrigins],
+      imgSrc: ["'self'", "data:", ...allowedOrigins],
+      connectSrc: ["'self'", ...allowedOrigins],
+    },
+  },
+  hsts: {
+    maxAge: 31536000, // 1 year
+    includeSubDomains: true,
+    preload: true,
+  },
+  frameguard: { action: 'deny' },
+  noSniff: true,
+  xssFilter: true,
+}));
 
 // Middleware (You'll need this for your API endpoints)
 app.use(express.json()); 
