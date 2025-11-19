@@ -15,7 +15,7 @@ import cors from 'cors';
 
 // Define allowed origins
 const allowedOrigins = [
-  'https://aganitha-frontend.vercel.app',
+  'https://aganitha-frontend-one.vercel.app',
   'http://localhost:5173', // For local development
 ];
 
